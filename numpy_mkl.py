@@ -9,7 +9,9 @@ import sys
 import timeit
  
 import numpy
+numpy.use_fastnumpy = True
 from numpy.random import random
+import mkl
  
 def test_eigenvalue():
     """
@@ -64,24 +66,31 @@ THREADS_LIMIT_ENV = 'OMP_NUM_THREADS'
  
 def start_benchmark():
     print "Benchmark starting timing with numpy %s\nVersion: %s" % (numpy.__version__, sys.version)
+    print ("-" * 80)
 
     for cur_threads in threads_range:
         header_set = False
-        os.environ[THREADS_LIMIT_ENV] = '%d' % cur_threads
-        print "Maximum number of threads used for computation is : %s" % os.environ[THREADS_LIMIT_ENV]
-        print ("-" * 80)
+        #os.environ[THREADS_LIMIT_ENV] = '%d' % cur_threads
+        mkl.set_num_threads(cur_threads)
+        print "Maximum number of threads used for computation is : %d" % cur_threads
 
         header_str = "%20s" % "Function"
-        header_str += ' - N=%02d [ms]' % cur_threads
+        header_str += ' - %9s - Speedup' % 'Time [ms]'
 
-        for fun in tests:
+        if cur_threads == 1:        
+            timings_single = []
+
+        for ii,fun in enumerate(tests):
 
             result_str = "%20s" % fun.__name__
             t = timeit.Timer(stmt="%s()" % fun.__name__, setup="from __main__ import %s" % fun.__name__)
             res = t.repeat(repeat=3, number=1)
             timing =  1000.0 * sum(res)/len(res)
+            
+            if cur_threads == 1:        
+                timings_single.append(timing)
         
-            result_str += ' - %9.1f' % timing
+            result_str += ' - %9.1f - %5.1f' % (timing, timings_single[ii]/timing)
                  
             if not header_set is True:
                 print header_str
