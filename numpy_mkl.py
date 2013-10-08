@@ -10,6 +10,8 @@ import timeit
  
 import numpy
 from numpy.random import random
+numpy.use_fastnumpy = True
+import mkl
  
 def test_eigenvalue():
     """
@@ -52,11 +54,20 @@ def test_dot():
     a = random((i, i))
     b = numpy.linalg.inv(a)
     result = numpy.dot(a, b) - numpy.eye(i)
- 
+
+def test_fft(): 
+    N = 2**16
+    
+    a = random((2, N))
+    fftn = fft.fftn
+    for i in range(100):
+        result = fftn(a, (N,), (1,))
+    
+   
 # Tests to start. 
 # Each key is a function, the item is list of thread counts to use
 threads_range = range(1,12,3)
-tests = (test_eigenvalue, test_svd, test_inv, test_det, test_dot)
+tests = (test_eigenvalue, test_svd, test_inv, test_det, test_dot, test_fft)
  
 # Setting the following environment variable in the shell executing the script allows
 # you limit the maximal number threads used for computation
