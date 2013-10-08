@@ -9,12 +9,9 @@ import sys
 import timeit
  
 import numpy
-numpy.use_fastnumpy = True
+#numpy.use_fastnumpy = True # This has no effect!
 from numpy.random import random
-<<<<<<< HEAD
-numpy.use_fastnumpy = True
-=======
->>>>>>> 4be03c41fe8a54015a4cc98ddc9a722b6943b94d
+
 import mkl
  
 def test_eigenvalue():
@@ -60,12 +57,12 @@ def test_dot():
     result = numpy.dot(a, b) - numpy.eye(i)
 
 def test_fft(): 
-    N = 2**16
-    
-    a = random((2, N))
-    fftn = fft.fftn
-    for i in range(100):
-        result = fftn(a, (N,), (1,))
+    N = 2**22
+    #N=1000
+    #a = random((N, N))
+    data = random((1,N))    
+    #for i in range(100):
+    result = numpy.fft.fft(data)
     
    
 # Tests to start. 
@@ -83,7 +80,10 @@ def start_benchmark():
 
     for cur_threads in threads_range:
         header_set = False
+
+        # This doesn't work: os.environ is not adjusted        
         #os.environ[THREADS_LIMIT_ENV] = '%d' % cur_threads
+        
         mkl.set_num_threads(cur_threads)
         print "Maximum number of threads used for computation is : %d" % cur_threads
 
